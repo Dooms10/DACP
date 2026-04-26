@@ -1,11 +1,21 @@
 import cors from 'cors'
 import express from 'express'
+import fs from 'node:fs'
+import path from 'node:path'
 import sqlite3 from 'sqlite3'
+import { fileURLToPath } from 'node:url'
 
 const app = express()
 const PORT = Number(globalThis.process?.env?.PORT) || 4000
 const ADMIN_PASSWORD = globalThis.process?.env?.ADMIN_PASSWORD || 'admin123'
-const db = new sqlite3.Database('./server/dacp.db')
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const distPath = path.resolve(__dirname, '../dist')
+const dataDir = globalThis.process?.env?.DATA_DIR || __dirname
+if (!fs.existsSync(dataDir)) {
+  fs.mkdirSync(dataDir, { recursive: true })
+}
+const dbPath = path.join(dataDir, 'dacp.db')
+const db = new sqlite3.Database(dbPath)
 
 app.use(cors())
 app.use(express.json())
@@ -366,6 +376,18 @@ app.post(
     }
   },
 )
+
+app.use(express.static(distPath))
+
+app.get(/^\/(?!api).*/, (req, res) => {
+  res.sendFile(path.join(distPath, 'index.html'), (error) => {
+    if (error) {
+      res.status(503).send(
+        'Frontend build not found. Run "npm run build" in the DACP project and restart server.',
+      )
+    }
+  })
+})
 
 setupDatabase()
 
