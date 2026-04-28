@@ -1,0 +1,217 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DACP Product Scanner</title>
+    <!-- React and Babel CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <!-- Html5-QRCode CDN -->
+    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        input {
+            margin: 5px 0;
+            padding: 8px;
+            width: 100%;
+            max-width: 300px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px 5px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #reader {
+            margin-top: 20px;
+        }
+        .product-details {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function App() {
+          const [product, setProduct] = useState(null);
+          const [form, setForm] = useState({
+            productId: '',
+            name: '',
+            price: '',
+            stock: '',
+            warehouse: '',
+            supplierName: ''
+          });
+
+          // Handle form input
+          const handleChange = (e) => {
+            setForm({ ...form, [e.target.name]: e.target.value });
+          };
+
+          // Create new product
+          const createProduct = async () => {
+            try {
+              const res = await axios.post('http://localhost:5000/product', {
+                productId: form.productId,
+                name: form.name,
+                price: Number(form.price),
+                stock: Number(form.stock),
+                warehouse: form.warehouse,
+                supplier: {
+                  supplierName: form.supplierName
+                }
+              });
+
+              alert('Product Created');
+              console.log(res.data);
+              // Clear form after successful creation
+              setForm({
+                productId: '',
+                name: '',
+                price: '',
+                stock: '',
+                warehouse: '',
+                supplierName: ''
+              });
+            } catch (err) {
+              console.error('Error creating product:', err);
+              alert('Error creating product. Please check console for details.');
+            }
+          };
+
+          // Start QR Scanner
+          const startScanner = () => {
+            const scanner = new Html5QrcodeScanner('reader', { 
+              fps: 10, 
+              qrbox: 250 
+            });
+
+            scanner.render(
+              async (data) => {
+                try {
+                  const res = await axios.get(`http://localhost:5000/product/${data}`);
+                  setProduct(res.data);
+                  scanner.clear();
+                } catch (err) {
+                  console.error('Error fetching product:', err);
+                  alert('Product not found or server error.');
+                  scanner.clear();
+                }
+              },
+              (err) => {
+                console.error('Scanner error:', err);
+              }
+            );
+          };
+
+          return React.createElement('div', { style: { padding: '20px', fontFamily: 'Arial' } },
+            // Heading
+            React.createElement('h1', null, 'DACP Product Scanner'),
+
+            // Create Product Section
+            React.createElement('h2', null, 'Create New Product'),
+            React.createElement('input', { 
+              name: 'productId', 
+              placeholder: 'Product ID', 
+              value: form.productId,
+              onChange: handleChange 
+            }),
+            React.createElement('br'),
+            React.createElement('input', { 
+              name: 'name', 
+              placeholder: 'Product Name', 
+              value: form.name,
+              onChange: handleChange 
+            }),
+            React.createElement('br'),
+            React.createElement('input', { 
+              name: 'price', 
+              placeholder: 'Price', 
+              type: 'number',
+              value: form.price,
+              onChange: handleChange 
+            }),
+            React.createElement('br'),
+            React.createElement('input', { 
+              name: 'stock', 
+              placeholder: 'Stock', 
+              type: 'number',
+              value: form.stock,
+              onChange: handleChange 
+            }),
+            React.createElement('br'),
+            React.createElement('input', { 
+              name: 'warehouse', 
+              placeholder: 'Warehouse', 
+              value: form.warehouse,
+              onChange: handleChange 
+            }),
+            React.createElement('br'),
+            React.createElement('input', { 
+              name: 'supplierName', 
+              placeholder: 'Supplier Name', 
+              value: form.supplierName,
+              onChange: handleChange 
+            }),
+            React.createElement('br'),
+            React.createElement('br'),
+
+            React.createElement('button', { onClick: createProduct }, 'Create Product'),
+
+            // QR Scanner Section
+            React.createElement('h2', null, 'Scan Product'),
+            React.createElement('button', { onClick: startScanner }, 'Start Scanner'),
+            React.createElement('div', { 
+              id: 'reader', 
+              style: { width: '300px', marginTop: '20px' } 
+            }),
+
+            // Display Product
+            product && React.createElement('div', { 
+              style: { marginTop: '20px' },
+              className: 'product-details'
+            },
+              React.createElement('h2', null, 'Product Details'),
+              React.createElement('p', null, React.createElement('b', null, 'Name: '), ' ', product.name),
+              React.createElement('p', null, React.createElement('b', null, 'Price: '), ' ', product.price),
+              React.createElement('p', null, React.createElement('b', null, 'Stock: '), ' ', product.stock),
+              React.createElement('p', null, React.createElement('b', null, 'Warehouse: '), ' ', product.warehouse),
+              React.createElement('p', null, React.createElement('b', null, 'Supplier: '), ' ', product.supplier?.supplierName || 'N/A'),
+              React.createElement('p', null, 
+                React.createElement('b', null, 'Last Scanned: '), 
+                ' ', 
+                product.lastScanned ? new Date(product.lastScanned).toLocaleString() : 'N/A'
+              )
+            )
+          );
+        }
+
+        // Render the app
+        ReactDOM.render(React.createElement(App), document.getElementById('root'));
+    </script>
+</body>
+</html>
