@@ -1,7 +1,6 @@
 services:
-  # Frontend Service
   - type: web
-    name: dacp-frontend
+    name: dacp
     env: static
     buildCommand: npm run build
     staticPublishPath: dist
@@ -12,22 +11,6 @@ services:
       - type: rewrite
         source: /api/*
         destination: https://dacp-backend.onrender.com/api/*
-    headers:
-      - path: /*
-        headers:
-          Cache-Control: no-cache
-      - path: /*.*
-        headers:
-          Cache-Control: public, max-age=31536000
-
-  # Backend Service (if needed)
-  - type: web
-    name: dacp-backend
-    env: node
-    buildCommand: npm install
-    startCommand: npm run server
-    envVars:
-      - key: NODE_VERSION
-        value: 18
-      - key: PORT
-        value: 5000
+      - type: rewrite
+        source: /.+
+        destination: /index.html
