@@ -7,10 +7,12 @@
     "dev": "vite",
     "server": "node server/server.js",
     "build": "vite build",
+    "build:prod": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "start": "npm run server",
-    "install": "npm install"
+    "install": "npm install",
+    "vercel-build": "vite build"
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.2.4",
