@@ -354,11 +354,3 @@ function AuthPage() {
 }
 
 export default AuthPage
-          Demo: Use any email/password to sign in. Add "admin" to email for admin role.
-        </motion.p>
-      </motion.div>
-    </div>
-  )
-}
-
-export default AuthPage

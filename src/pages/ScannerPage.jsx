@@ -625,3 +625,5 @@ function ScannerPage() {
   )
 }
 
+export default ScannerPage
+
