@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DACP - Modern Product Scanner</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/framer-motion@10.16.4/dist/framer-motion.js"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .glassmorphism {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(59, 130, 246, 0.4);
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        .nav-link {
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            color: white;
+            font-weight: 500;
+        }
+        
+        .nav-link:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .nav-link.active {
+            background: #3b82f6;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+        }
+        
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        
+        function App() {
+            const [currentPage, setCurrentPage] = useState('auth');
+            const [isAuthenticated, setIsAuthenticated] = useState(false);
+            const [user, setUser] = useState(null);
+            const [loading, setLoading] = useState(false);
+
+            if (loading) {
+                return (
+                    <div className="min-h-screen flex items-center justify-center">
+                        <div className="text-center">
+                            <div className="loading-spinner mx-auto mb-4"></div>
+                            <p className="text-white text-lg">Loading...</p>
+                        </div>
+                    </div>
+                );
+            }
+
+            if (!isAuthenticated) {
+                return <AuthPage onAuth={(userData) => { setIsAuthenticated(true); setUser(userData); }} />;
+            }
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+                    <Navigation user={user} onLogout={() => { setIsAuthenticated(false); setUser(null); }} currentPage={currentPage} setCurrentPage={setCurrentPage} />
+                    <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                        {currentPage === 'scanner' ? <ScannerPage /> : <ProductDataPage />}
+                    </main>
+                </div>
+            );
+        }
+
+        function Navigation({ user, onLogout, currentPage, setCurrentPage }) {
+            return (
+                <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl border-b border-slate-200/50 shadow-lg">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div className="flex items-center justify-between h-16">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl shadow-lg">
+                                    <Package className="w-6 h-6 text-white" />
+                                </div>
+                                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
+                                    DACP
+                                </span>
+                            </div>
+                            
+                            <div className="hidden md:flex items-center gap-2">
+                                <button 
+                                    className={`nav-link flex items-center gap-2 ${currentPage === 'scanner' ? 'active' : ''}`}
+                                    onClick={() => setCurrentPage('scanner')}
+                                >
+                                    <Database className="w-4 h-4" />
+                                    Scanner
+                                </button>
+                                <button 
+                                    className={`nav-link flex items-center gap-2 ${currentPage === 'data' ? 'active' : ''}`}
+                                    onClick={() => setCurrentPage('data')}
+                                >
+                                    <Package className="w-4 h-4" />
+                                    Product Data
+                                </button>
+                            </div>
+                            
+                            <div className="hidden md:flex items-center gap-4">
+                                <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg">
+                                    <User className="w-4 h-4 text-blue-600" />
+                                    <span className="text-sm font-medium text-slate-700">
+                                        {user?.name || user?.email}
+                                    </span>
+                                </div>
+                                <button 
+                                    onClick={onLogout}
+                                    className="btn-primary flex items-center gap-2"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    Sign Out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </nav>
+            );
+        }
+
+        function AuthPage({ onAuth }) {
+            const [isLogin, setIsLogin] = useState(true);
+            const [formData, setFormData] = useState({
+                email: '',
+                password: '',
+                name: ''
+            });
+            const [error, setError] = useState('');
+            const [isSubmitting, setIsSubmitting] = useState(false);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                setIsSubmitting(true);
+                setError('');
+                
+                // Simulate authentication
+                setTimeout(() => {
+                    if (formData.email && formData.password) {
+                        const userData = {
+                            name: formData.name || formData.email.split('@')[0],
+                            email: formData.email,
+                            isAdmin: formData.email.includes('admin')
+                        };
+                        onAuth(userData);
+                    } else {
+                        setError('Please enter email and password');
+                    }
+                    setIsSubmitting(false);
+                }, 1000);
+            };
+
+            return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 flex items-center justify-center p-4">
+                    <div className="absolute inset-0 overflow-hidden">
+                        <div className="absolute -top-40 -right-40 w-80 h-80 bg-blue-500/20 rounded-full blur-3xl"></div>
+                        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl"></div>
+                    </div>
+
+                    <div className="w-full max-w-md relative">
+                        <div className="text-center mb-8">
+                            <div className="inline-flex p-4 bg-gradient-to-br from-blue-500 to-blue-700 rounded-2xl shadow-lg shadow-blue-500/30 mb-4 floating">
+                                <Package className="w-10 h-10 text-white" />
+                            </div>
+                            <h1 className="text-4xl font-bold text-white mb-2">DACP</h1>
+                            <p className="text-slate-400">Product Scan & Inventory Management</p>
+                        </div>
+
+                        <div className="glassmorphism rounded-2xl p-6">
+                            <div className="flex border-b border-white/10 mb-6">
+                                <button 
+                                    className={`flex-1 py-4 font-medium transition-colors ${isLogin ? 'text-white border-b-2 border-blue-500' : 'text-slate-400 hover:text-white'}`}
+                                    onClick={() => setIsLogin(true)}
+                                >
+                                    Sign In
+                                </button>
+                                <button 
+                                    className={`flex-1 py-4 font-medium transition-colors ${!isLogin ? 'text-white border-b-2 border-blue-500' : 'text-slate-400 hover:text-white'}`}
+                                    onClick={() => setIsLogin(false)}
+                                >
+                                    Sign Up
+                                </button>
+                            </div>
+
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                {!isLogin && (
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-300 mb-2">Name</label>
+                                        <input
+                                            type="text"
+                                            placeholder="Enter your name"
+                                            value={formData.name}
+                                            onChange={(e) => setFormData({...formData, name: e.target.value})}
+                                            className="input-field w-full"
+                                        />
+                                    </div>
+                                )}
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Email</label>
+                                    <input
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={formData.email}
+                                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                                        className="input-field w-full"
+                                        required
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-300 mb-2">Password</label>
+                                    <input
+                                        type="password"
+                                        placeholder="Enter your password"
+                                        value={formData.password}
+                                        onChange={(e) => setFormData({...formData, password: e.target.value})}
+                                        className="input-field w-full"
+                                        required
+                                    />
+                                </div>
+
+                                {error && (
+                                    <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm">
+                                        {error}
+                                    </div>
+                                )}
+
+                                <button 
+                                    type="submit" 
+                                    className="w-full btn-primary flex items-center justify-center gap-2"
+                                    disabled={isSubmitting}
+                                >
+                                    {isSubmitting ? (
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    ) : (
+                                        <>
+                                            <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                                            <ArrowRight className="w-5 h-5" />
+                                        </>
+                                    )}
+                                </button>
+                            </form>
+
+                            <div className="mt-6 text-center">
+                                <p className="text-slate-400">
+                                    {isLogin ? "Don't have an account?" : "Already have an account?"}
+                                    <button 
+                                        type="button" 
+                                        onClick={() => setIsLogin(!isLogin)} 
+                                        className="ml-2 text-blue-400 hover:text-blue-300 font-medium"
+                                    >
+                                        {isLogin ? 'Sign Up' : 'Sign In'}
+                                    </button>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-center gap-6 mt-8">
+                            <div className="flex items-center gap-2 text-slate-400 text-sm">
+                                <Sparkles className="w-4 h-4" />
+                                <span>Smart Scanning</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-400 text-sm">
+                                <Shield className="w-4 h-4" />
+                                <span>Secure Data</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-slate-400 text-sm">
+                                <Zap className="w-4 h-4" />
+                                <span>Fast Processing</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        function ScannerPage() {
+            const [productId, setProductId] = useState('');
+            const [product, setProduct] = useState(null);
+            const [isScanning, setIsScanning] = useState(false);
+            const [newProduct, setNewProduct] = useState({
+                name: '',
+                price: '',
+                stock: '',
+                warehouse: ''
+            });
+
+            const handleScan = () => {
+                if (!productId) {
+                    alert('Please enter a product ID');
+                    return;
+                }
+                
+                setIsScanning(true);
+                // Simulate scanning
+                setTimeout(() => {
+                    setProduct({
+                        id: productId,
+                        name: `Product ${productId}`,
+                        price: 99.99,
+                        stock: 50,
+                        warehouse: 'Main Warehouse',
+                        lastScanned: new Date().toLocaleString()
+                    });
+                    setIsScanning(false);
+                }, 2000);
+            };
+
+            const handleCreate = () => {
+                if (!newProduct.name || !newProduct.price || !newProduct.stock) {
+                    alert('Please fill all fields');
+                    return;
+                }
+                
+                alert('Product created successfully!');
+                setNewProduct({ name: '', price: '', stock: '', warehouse: '' });
+            };
+
+            return (
+                <div className="space-y-6">
+                    <div className="text-center">
+                        <h1 className="text-3xl font-bold text-slate-800 mb-2">Product Scanner</h1>
+                        <p className="text-slate-600">Scan or create products with modern UI</p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-6">
+                        <div className="card">
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                <Camera className="w-5 h-5 text-blue-600" />
+                                Scan Product
+                            </h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Product ID</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter product ID"
+                                        value={productId}
+                                        onChange={(e) => setProductId(e.target.value)}
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <button 
+                                    onClick={handleScan}
+                                    disabled={isScanning}
+                                    className="btn-primary w-full flex items-center justify-center gap-2"
+                                >
+                                    {isScanning ? (
+                                        <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    ) : (
+                                        <>
+                                            <Camera className="w-5 h-5" />
+                                            Scan Product
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                        </div>
+
+                        <div className="card">
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                <Plus className="w-5 h-5 text-green-600" />
+                                Create Product
+                            </h2>
+                            <div className="space-y-4">
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Product Name</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter product name"
+                                        value={newProduct.name}
+                                        onChange={(e) => setNewProduct({...newProduct, name: e.target.value})}
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-2">Price</label>
+                                        <input
+                                            type="number"
+                                            placeholder="0.00"
+                                            value={newProduct.price}
+                                            onChange={(e) => setNewProduct({...newProduct, price: e.target.value})}
+                                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-sm font-medium text-slate-700 mb-2">Stock</label>
+                                        <input
+                                            type="number"
+                                            placeholder="0"
+                                            value={newProduct.stock}
+                                            onChange={(e) => setNewProduct({...newProduct, stock: e.target.value})}
+                                            className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                        />
+                                    </div>
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-slate-700 mb-2">Warehouse</label>
+                                    <input
+                                        type="text"
+                                        placeholder="Enter warehouse"
+                                        value={newProduct.warehouse}
+                                        onChange={(e) => setNewProduct({...newProduct, warehouse: e.target.value})}
+                                        className="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    />
+                                </div>
+                                <button 
+                                    onClick={handleCreate}
+                                    className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-lg transition-colors flex items-center justify-center gap-2"
+                                >
+                                    <Plus className="w-5 h-5" />
+                                    Create Product
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {product && (
+                        <div className="card">
+                            <h2 className="text-xl font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                                <CheckCircle className="w-5 h-5 text-green-600" />
+                                Scanned Product
+                            </h2>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm text-slate-600">Product ID</p>
+                                    <p className="font-medium text-slate-800">{product.id}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-600">Name</p>
+                                    <p className="font-medium text-slate-800">{product.name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-600">Price</p>
+                                    <p className="font-medium text-slate-800">${product.price}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-600">Stock</p>
+                                    <p className="font-medium text-slate-800">{product.stock} units</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-600">Warehouse</p>
+                                    <p className="font-medium text-slate-800">{product.warehouse}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm text-slate-600">Last Scanned</p>
+                                    <p className="font-medium text-slate-800">{product.lastScanned}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        function ProductDataPage() {
+            const [products] = useState([
+                { id: 'PRD001', name: 'Laptop Pro', price: 1299.99, stock: 25, warehouse: 'Main Warehouse' },
+                { id: 'PRD002', name: 'Wireless Mouse', price: 49.99, stock: 150, warehouse: 'North Warehouse' },
+                { id: 'PRD003', name: 'USB-C Hub', price: 79.99, stock: 8, warehouse: 'Main Warehouse' },
+                { id: 'PRD004', name: 'Mechanical Keyboard', price: 189.99, stock: 0, warehouse: 'East Warehouse' },
+            ]);
+
+            return (
+                <div className="space-y-6">
+                    <div className="text-center">
+                        <h1 className="text-3xl font-bold text-slate-800 mb-2">Product Data</h1>
+                        <p className="text-slate-600">Manage your inventory with modern interface</p>
+                    </div>
+
+                    <div className="card">
+                        <div className="flex items-center justify-between mb-6">
+                            <h2 className="text-xl font-semibold text-slate-800 flex items-center gap-2">
+                                <Database className="w-5 h-5 text-blue-600" />
+                                Product Inventory
+                            </h2>
+                            <button className="btn-primary flex items-center gap-2">
+                                <Download className="w-4 h-4" />
+                                Export CSV
+                            </button>
+                        </div>
+
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="border-b border-slate-200">
+                                        <th className="text-left py-3 px-4 font-medium text-slate-700">Product ID</th>
+                                        <th className="text-left py-3 px-4 font-medium text-slate-700">Name</th>
+                                        <th className="text-left py-3 px-4 font-medium text-slate-700">Price</th>
+                                        <th className="text-left py-3 px-4 font-medium text-slate-700">Stock</th>
+                                        <th className="text-left py-3 px-4 font-medium text-slate-700">Warehouse</th>
+                                        <th className="text-left py-3 px-4 font-medium text-slate-700">Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {products.map((product, index) => (
+                                        <tr key={product.id} className={`border-b border-slate-100 hover:bg-slate-50 ${index % 2 === 0 ? 'bg-white' : 'bg-slate-50/50'}`}>
+                                            <td className="py-3 px-4 font-medium text-slate-800">{product.id}</td>
+                                            <td className="py-3 px-4 text-slate-700">{product.name}</td>
+                                            <td className="py-3 px-4 text-slate-700">${product.price}</td>
+                                            <td className="py-3 px-4">
+                                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                    product.stock > 50 ? 'bg-green-100 text-green-800' : 
+                                                    product.stock > 0 ? 'bg-yellow-100 text-yellow-800' : 
+                                                    'bg-red-100 text-red-800'
+                                                }`}>
+                                                    {product.stock} units
+                                                </span>
+                                            </td>
+                                            <td className="py-3 px-4 text-slate-700">{product.warehouse}</td>
+                                            <td className="py-3 px-4">
+                                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                                                    product.stock > 0 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                                                }`}>
+                                                    {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>

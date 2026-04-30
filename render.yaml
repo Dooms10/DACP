@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: dacp
+    name: dacp-frontend
     env: static
     buildCommand: npm run build
     staticPublishPath: dist
@@ -9,8 +9,8 @@ services:
         value: 18
     routes:
       - type: rewrite
-        source: /api/*
-        destination: https://dacp-backend.onrender.com/api/*
+        source: /api/(.*)
+        destination: https://dacp-backend.onrender.com/api/$1
       - type: rewrite
-        source: /.+
+        source: /.*
         destination: /index.html
