@@ -106,7 +106,7 @@ function AuthPage() {
             <Package className="w-10 h-10 text-white" />
           </motion.div>
           <motion.h1
-            className="text-4xl font-bold text-white"
+            className="text-4xl font-black text-white"
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
@@ -114,12 +114,12 @@ function AuthPage() {
             DACP
           </motion.h1>
           <motion.p 
-            className="text-slate-400 mt-2"
+            className="text-lg font-bold text-slate-300 mt-2"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.4, duration: 0.5 }}
           >
-            Product Scan & Inventory Management
+            PRODUCT SCAN & INVENTORY MANAGEMENT
           </motion.p>
         </div>
 
@@ -133,7 +133,7 @@ function AuthPage() {
           {/* Tabs */}
           <div className="flex border-b border-white/10">
             <motion.button 
-              className={`flex-1 py-4 font-medium transition-colors flex items-center justify-center gap-2 ${
+              className={`flex-1 py-4 font-bold transition-colors flex items-center justify-center gap-2 ${
                 isLogin 
                   ? 'bg-white/10 text-white border-b-2 border-blue-500' 
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -143,10 +143,10 @@ function AuthPage() {
               whileTap={{ scale: 0.98 }}
             >
               <User className="w-4 h-4" />
-              Sign In
+              SIGN IN
             </motion.button>
             <motion.button 
-              className={`flex-1 py-4 font-medium transition-colors flex items-center justify-center gap-2 ${
+              className={`flex-1 py-4 font-bold transition-colors flex items-center justify-center gap-2 ${
                 !isLogin 
                   ? 'bg-white/10 text-white border-b-2 border-blue-500' 
                   : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -156,7 +156,7 @@ function AuthPage() {
               whileTap={{ scale: 0.98 }}
             >
               <User className="w-4 h-4" />
-              Sign Up
+              SIGN UP
             </motion.button>
           </div>
 
@@ -178,9 +178,9 @@ function AuthPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                   >
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-bold text-slate-300 mb-2">
                       <User className="w-4 h-4 inline mr-1" />
-                      Full Name
+                      FULL NAME
                     </label>
                     <input
                       type="text"
@@ -189,7 +189,7 @@ function AuthPage() {
                       value={formData.name}
                       onChange={handleChange}
                       autoComplete="name"
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-lg"
                     />
                   </motion.div>
                 )}
@@ -199,9 +199,9 @@ function AuthPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-bold text-slate-300 mb-2">
                     <Mail className="w-4 h-4 inline mr-1" />
-                    Email Address
+                    EMAIL ADDRESS
                   </label>
                   <input
                     type="email"
@@ -211,7 +211,7 @@ function AuthPage() {
                     onChange={handleChange}
                     autoComplete="email"
                     required
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-lg"
                   />
                 </motion.div>
 
@@ -220,9 +220,9 @@ function AuthPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <label className="block text-sm font-medium text-slate-300 mb-2">
+                  <label className="block text-sm font-bold text-slate-300 mb-2">
                     <Lock className="w-4 h-4 inline mr-1" />
-                    Password
+                    PASSWORD
                   </label>
                   <div className="relative">
                     <input
@@ -233,7 +233,7 @@ function AuthPage() {
                       onChange={handleChange}
                       autoComplete={isLogin ? "current-password" : "new-password"}
                       required
-                      className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-lg"
                     />
                     <button
                       type="button"
@@ -251,9 +251,9 @@ function AuthPage() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.4 }}
                   >
-                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                    <label className="block text-sm font-bold text-slate-300 mb-2">
                       <Lock className="w-4 h-4 inline mr-1" />
-                      Confirm Password
+                      CONFIRM PASSWORD
                     </label>
                     <div className="relative">
                       <input
@@ -263,7 +263,7 @@ function AuthPage() {
                         value={formData.confirmPassword}
                         onChange={handleChange}
                         autoComplete="new-password"
-                        className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                        className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors text-lg"
                       />
                       <button
                         type="button"
@@ -293,7 +293,7 @@ function AuthPage() {
                 {/* Submit Button */}
                 <motion.button 
                   type="submit" 
-                  className="w-full py-3 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-lg font-medium transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2"
+                  className="w-full py-4 bg-gradient-to-r from-blue-500 to-blue-700 hover:from-blue-600 hover:to-blue-800 text-white rounded-lg font-bold transition-all shadow-lg shadow-blue-500/30 flex items-center justify-center gap-2 text-lg"
                   disabled={isSubmitting}
                   whileHover={{ scale: 1.02, y: -2 }}
                   whileTap={{ scale: 0.98 }}
@@ -302,7 +302,7 @@ function AuthPage() {
                     <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   ) : (
                     <>
-                      <span>{isLogin ? 'Sign In' : 'Create Account'}</span>
+                      <span>{isLogin ? 'SIGN IN' : 'CREATE ACCOUNT'}</span>
                       <ArrowRight className="w-5 h-5" />
                     </>
                   )}
@@ -312,16 +312,16 @@ function AuthPage() {
 
             {/* Footer */}
             <div className="mt-6 text-center">
-              <p className="text-slate-400">
+              <p className="text-slate-400 font-bold">
                 {isLogin ? "Don't have an account?" : "Already have an account?"}
                 <motion.button 
                   type="button" 
                   onClick={toggleMode} 
-                  className="ml-2 text-blue-400 hover:text-blue-300 font-medium"
+                  className="ml-2 text-blue-400 hover:text-blue-300 font-bold"
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                 >
-                  {isLogin ? 'Sign Up' : 'Sign In'}
+                  {isLogin ? 'SIGN UP' : 'SIGN IN'}
                 </motion.button>
               </p>
             </div>
@@ -335,17 +335,17 @@ function AuthPage() {
           animate={{ opacity: 1 }}
           transition={{ delay: 0.8, duration: 0.5 }}
         >
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+          <div className="flex items-center gap-2 text-slate-400 text-sm font-bold">
             <Sparkles className="w-4 h-4" />
-            <span>Smart Scanning</span>
+            <span>SMART SCANNING</span>
           </div>
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+          <div className="flex items-center gap-2 text-slate-400 text-sm font-bold">
             <Shield className="w-4 h-4" />
-            <span>Secure Data</span>
+            <span>SECURE DATA</span>
           </div>
-          <div className="flex items-center gap-2 text-slate-400 text-sm">
+          <div className="flex items-center gap-2 text-slate-400 text-sm font-bold">
             <Zap className="w-4 h-4" />
-            <span>Fast Processing</span>
+            <span>FAST PROCESSING</span>
           </div>
         </motion.div>
       </motion.div>
