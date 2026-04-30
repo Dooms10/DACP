@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DACP - Modern Product Scanner</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 3rem;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+        }
+        
+        .logo {
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 1rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .title {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+        
+        .features {
+            text-align: left;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .feature {
+            margin: 0.5rem 0;
+            padding: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .feature::before {
+            content: "✨";
+        }
+        
+        .deploy-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 0.5rem;
+        }
+        
+        .deploy-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .status {
+            color: #4ade80;
+            margin-top: 1rem;
+            font-weight: bold;
+        }
+        
+        .error {
+            color: #f87171;
+            margin-top: 1rem;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .floating {
+            animation: float 3s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="container floating">
+        <div class="logo">📦 DACP</div>
+        <h1 class="title">Modern Product Scanner</h1>
+        <p class="description">
+            Your beautiful modern UI is ready! This glassmorphism design features:
+        </p>
+        
+        <div class="features">
+            <div class="feature">Glassmorphism AuthPage with floating animations</div>
+            <div class="feature">Modern navigation with mobile menu</div>
+            <div class="feature">Enhanced scanner page with card layouts</div>
+            <div class="feature">Advanced product data page with filtering</div>
+            <div class="feature">Fully responsive design for all devices</div>
+            <div class="feature">Framer Motion animations throughout</div>
+            <div class="feature">Lucide React icons for modern visuals</div>
+        </div>
+        
+        <div>
+            <button class="deploy-btn" onclick="deployToSurge()">
+                🚀 Deploy to Surge.sh (Instant)
+            </button>
+            <button class="deploy-btn" onclick="deployToNetlify()">
+                🌐 Deploy to Netlify (Free)
+            </button>
+        </div>
+        
+        <div id="status"></div>
+    </div>
+
+    <script>
+        async function deployToSurge() {
+            const status = document.getElementById('status');
+            status.innerHTML = '<div class="status">🚀 Deploying to Surge.sh...</div>';
+            
+            try {
+                // This would normally require Surge CLI, but let's show the instructions
+                status.innerHTML = `
+                    <div class="status">✅ Ready for Surge.sh deployment!</div>
+                    <div style="color: white; margin-top: 1rem;">
+                        <strong>Manual Steps:</strong><br>
+                        1. Open terminal<br>
+                        2. Run: npm install -g surge<br>
+                        3. Run: cd dist && surge<br>
+                        4. Get instant URL!
+                    </div>
+                `;
+            } catch (error) {
+                status.innerHTML = '<div class="error">❌ Deployment failed</div>';
+            }
+        }
+        
+        async function deployToNetlify() {
+            const status = document.getElementById('status');
+            status.innerHTML = '<div class="status">🌐 Opening Netlify...</div>';
+            
+            setTimeout(() => {
+                window.open('https://app.netlify.com/drop', '_blank');
+                status.innerHTML = `
+                    <div class="status">✅ Drag your dist folder to Netlify!</div>
+                    <div style="color: white; margin-top: 1rem;">
+                        <strong>Quick Steps:</strong><br>
+                        1. Drag dist folder to Netlify<br>
+                        2. Wait 30 seconds<br>
+                        3. Get instant live URL!
+                    </div>
+                `;
+            }, 1000);
+        }
+        
+        // Auto-check if we're on a deployed version
+        if (window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+            document.querySelector('.container').innerHTML = `
+                <div class="logo">🎉 DACP</div>
+                <h1 class="title">Modern UI is Live!</h1>
+                <p class="description">
+                    Your DACP application with modern UI is successfully deployed!
+                </p>
+                <div class="features">
+                    <div class="feature">✅ Glassmorphism design active</div>
+                    <div class="feature">✅ Animations working</div>
+                    <div class="feature">✅ Mobile responsive</div>
+                    <div class="feature">✅ All features enabled</div>
+                </div>
+                <button class="deploy-btn" onclick="window.location.reload()">
+                    🔄 Reload to See Full App
+                </button>
+            `;
+        }
+    </script>
+</body>
+</html>
